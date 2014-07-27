@@ -12,7 +12,7 @@ var settings = {
 
 //定数とグローバル変数
 var plugin_title = "Speed Guide for Sketch";
-var plugin_version = "0.5.0";
+var plugin_version = "0.5.1";
 var artboard = [[doc currentPage] currentArtboard] || [doc currentPage];
 var vRuler = [artboard verticalRulerData];
 var hRuler = [artboard horizontalRulerData];

@@ -51,9 +51,9 @@ Guide.prototype.init = function() {
 				this.span = this.convertToPixel(this.span, this.spanUnits);
 				this.spanUnits = "px";
 			}
-			// this.val = parseInt(Math.round(this.val));
 			this.val = this.getOffset(this.val, this.artboad, true);
-		} else {
+			this.val = Number(this.val);
+			this.span = Number(this.span);
 		}
 	} else {
 		//Null
@@ -165,7 +165,6 @@ function getGuides(str, drc, atb) {
 				guide.span = guide.val;
 				guide.spanUnits = guide.units;
 			}
-
 			if(!guide.val || guide.val.length < 1) guide.val = null;
 			guide.init();
 			// 繰り返し処理
