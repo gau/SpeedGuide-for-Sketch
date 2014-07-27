@@ -1,6 +1,10 @@
-# Speed Guide ReadMe #
+# Speed Guide for Sketch.app ReadMe #
 
 ガイドを素早く作成するためのSketch.app用プラグインです。複数のガイドをスペース区切りで一度に作成できます。不規則なガイドをたくさん作成するときに便利です。
+
+[Photoshop版](https://github.com/gau/SpeedGuide)→[図入りの解説記事](http://graphicartsunit.tumblr.com/post/92236824249/photoshop-speed-guide)
+
+※基本の使い方はPhotoshop版と同じです	
 
 -----
 
