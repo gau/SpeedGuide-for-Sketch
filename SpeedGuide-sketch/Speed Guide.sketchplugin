@@ -1,0 +1,101 @@
+// (alt cmd g)
+#import 'lib/sgcore.js'
+
+//==================================================
+//初期値
+//==================================================
+var settings = {
+	ver : "",
+	hor : "",
+	clearall : 0
+};
+
+//定数とグローバル変数
+var plugin_title = "Speed Guide for Sketch";
+var plugin_version = "0.5.0";
+var artboard = [[doc currentPage] currentArtboard] || [doc currentPage];
+var vRuler = [artboard verticalRulerData];
+var hRuler = [artboard horizontalRulerData];
+
+function SpeedGuide() {}
+SpeedGuide.prototype.createDialog = function(){
+	var formItems = [], rescd;
+	var dialog = COSAlertWindow.new();
+	dialog.setMessageText(plugin_title + " - ver." + plugin_version);
+	formItems.push(dialog.addButtonWithTitle('OK'));
+	formItems.push(dialog.addButtonWithTitle('Cancel'));
+	dialog.addTextLabelWithValue("垂直:");
+	formItems.push(dialog.addTextFieldWithValue(settings.ver));
+	dialog.addTextLabelWithValue("水平:");
+	formItems.push(dialog.addTextFieldWithValue(settings.hor));
+	formItems.push(NSButton.alloc().initWithFrame(NSMakeRect(0, 0, 300, 25)));
+	formItems[formItems.length-1].setButtonType(NSSwitchButton);
+	// formItems[formItems.length-1].setTitle("Delete all guides before add new guides");
+	formItems[formItems.length-1].setTitle("既存のガイドを全消去する");
+	dialog.addAccessoryView(formItems[formItems.length-1]);
+	rescd = dialog.runModal();
+	this.start(dialog, rescd);
+};
+SpeedGuide.prototype.start = function(dialog, rescd) {
+	var artboardSize, guides, verGuides, horGuides, errors=[];
+	settings.ver = dialog.viewAtIndex(1).stringValue();
+	settings.hor = dialog.viewAtIndex(3).stringValue();
+	settings.clearall = dialog.viewAtIndex(4).stringValue();
+	if(rescd != 1000) return false;
+	if(settings.clearall != 0) this.removeAllGuides(vRuler, hRuler);
+	artboardSize = [artboard.frame().width(),artboard.frame().height()];
+	verGuides = getGuides(settings.ver, "ver", artboardSize);
+	horGuides = getGuides(settings.hor, "hor", artboardSize);
+	guides = Array.prototype.concat.apply(verGuides, horGuides);
+	for (var i in guides){
+		var er = guides[i].validationError();
+		if (er) errors.push(guides[i].origin);
+	}
+	if(errors.length > 0) {
+		// showAlert("The specified value is invalid.( " + errors.length + " errors)", errorStr);
+		var errorStr = errors.join(" , ");
+		showAlert("無効な値が " + errors.length + " 点あります", errorStr);
+		this.createDialog();
+	} else {
+		this.addGuides(guides);
+	}
+
+};
+SpeedGuide.prototype.addGuides = function(guides) {
+	for (var i in guides){
+		guides[i].val = parseInt(Math.round(guides[i].val));
+		switch(guides[i].direction) {
+			case "ver" :
+				[hRuler addGuideWithValue:guides[i].val];
+				break;
+			case "hor" :
+				[vRuler addGuideWithValue:guides[i].val];
+				break;
+			default:
+				break;
+		}
+	}
+}
+SpeedGuide.prototype.removeAllGuides = function(vrl, hrl) {
+	var vc = [vrl numberOfGuides], hc = [hrl numberOfGuides];
+	for (var i=0; i<vc; i++) {
+		 [vrl removeGuideAtIndex:0];
+	}
+	for (var i=0; i<hc; i++) {
+		 [hrl removeGuideAtIndex:0];
+	}
+};
+var mainDialog = new SpeedGuide();
+var abs = parseInt([[[doc currentPage] artboards] count]);
+try {
+	[artboard contentBounds];
+	if(abs != 0) abs = -1;
+} catch(e) {
+} finally {
+	var message = "このページにはアートボードがありません";
+	if(abs == -1) message = "アートボードが選択されていません";
+	if(abs <= 0) {
+		showAlert(message,"ガイドの基準はページになります。ページの大きさは、幅 " + artboard.frame().width() + " px、高さ " + artboard.frame().height() + " px として仮想的に計算されますので、右下起点や中央起点を利用する場合にはご注意ください" );
+	}
+		mainDialog.createDialog();
+}
